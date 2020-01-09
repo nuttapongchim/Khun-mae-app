@@ -64,6 +64,7 @@ export class SignUpScreen extends Component {
     }
 
     checkDuplicate = () => {
+        console.log(this.state.username)
         httpClient
             .get('/check_member/' + this.state.username)
             .then(res => {
@@ -103,7 +104,7 @@ export class SignUpScreen extends Component {
                 placeholder="เลือกวันเกิด"
                 format="YYYY-MM-DD"
                 minDate="1975-01-01"
-                maxDate="2020-01-01"
+                maxDate="2030-01-01"
                 confirmBtnText="เลือก"
                 cancelBtnText="ยกเลิก"
                 customStyles={{
@@ -125,7 +126,7 @@ export class SignUpScreen extends Component {
     toDate(date) {
         var months = ['0', 'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤษจิกายน', 'ธันวาคม'];
         var d = date.split("-");
-        var formatDate = `${d[2]} ${months[d[1]]} ${parseInt(d[0]) + 543} `
+        var formatDate = `${d[2]} ${months[parseInt(d[1])]} ${parseInt(d[0]) + 543} `
         return formatDate;
     }
 
