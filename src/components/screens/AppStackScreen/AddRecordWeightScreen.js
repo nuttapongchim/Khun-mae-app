@@ -20,7 +20,13 @@ export class AddRecordWeightScreen extends Component {
       isFetching: false,
       dialogVisible: false,
       editRecordDate: '',
-      editRecordValue: ''
+      editRecordValue: '',
+      whitelist:[
+        {
+          start:moment().startOf("week"),
+          end:moment().endOf("week")
+        }
+      ],
     };
 
     this.recordWeight = this.recordWeight.bind(this);
@@ -32,6 +38,21 @@ export class AddRecordWeightScreen extends Component {
 
   componentDidMount() {
     this.loadRecord();
+    //this.setWhitelist()
+  }
+
+  setWhitelist = () =>{
+    const today = moment();
+    const from_date = today.startOf('week');
+    const to_date = today.endOf('week');
+    this.setState({
+      whitelist:[
+        {
+          "start":from_date.toString(),
+          "end":to_date.toString()
+        }
+      ]
+    })
   }
 
   toDate(date) {
@@ -170,6 +191,8 @@ export class AddRecordWeightScreen extends Component {
                   disabledDateNameStyle={{ color: 'grey' }}
                   disabledDateNumberStyle={{ color: 'grey' }}
                   iconContainer={{ flex: 0.1 }}
+                  updateWeek={true}
+                  datesWhitelist={this.state.whitelist}
                   onDateSelected={(value) => this.setState({ selectedDate: moment(new Date(value)).format("YYYY-MM-DD hh:mm:ss") })}
                 />
               </View>
