@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "651280344622",
+    "firebase_url": "https://khunmea-c7c0d.firebaseio.com",
+    "project_id": "khunmea-c7c0d",
+    "storage_bucket": "khunmea-c7c0d.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:651280344622:android:6ebd3880a4645e5fd521bf",
+        "android_client_info": {
+          "package_name": "com.khunmea"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "651280344622-p4n2mevok3ivt8pj8h5ftgt4d0r8p6h0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.khunmea",
+            "certificate_hash": "9192b551f1da837d66837c365e51426dec01f870"
+          }
+        },
+        {
+          "client_id": "651280344622-eud5rk3m9sa5k9itpq2pb5vupognrok7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCPlokxrJxUJvL_QxOZarj2QekC4uZdXkA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "651280344622-eud5rk3m9sa5k9itpq2pb5vupognrok7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

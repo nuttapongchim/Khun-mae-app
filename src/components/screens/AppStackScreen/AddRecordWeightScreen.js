@@ -191,7 +191,6 @@ export class AddRecordWeightScreen extends Component {
                   disabledDateNameStyle={{ color: 'grey' }}
                   disabledDateNumberStyle={{ color: 'grey' }}
                   iconContainer={{ flex: 0.1 }}
-                  updateWeek={true}
                   datesWhitelist={this.state.whitelist}
                   onDateSelected={(value) => this.setState({ selectedDate: moment(new Date(value)).format("YYYY-MM-DD hh:mm:ss") })}
                 />
