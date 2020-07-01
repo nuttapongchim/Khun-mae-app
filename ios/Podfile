@@ -16,6 +16,10 @@ target 'KhunMea' do
 
     pod 'RNVectorIcons', :path => '../node_modules/react-native-vector-icons'
 
+    pod 'RNFBApp', :path => '../node_modules/@react-native-firebase/app'
+
+    pod 'RNFBMessaging', :path => '../node_modules/@react-native-firebase/messaging'
+
   end
 
   target 'KhunMeaTests' do

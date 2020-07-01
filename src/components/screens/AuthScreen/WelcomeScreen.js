@@ -3,6 +3,8 @@ import { Text, View, StyleSheet, SafeAreaView, TextInput, TouchableOpacity, Aler
 import { Container, Content } from 'native-base';
 import qs from 'qs';
 import { httpClient } from '../../../../HttpClient';
+import messaging from '@react-native-firebase/messaging';
+
 
 export class WelcomeScreen extends Component {
 
@@ -10,7 +12,8 @@ export class WelcomeScreen extends Component {
         super()
         this.state = {
             username: '',
-            password: ''
+            password: '',
+            token:''
         }
 
         this.sigIn = this.sigIn.bind(this)
@@ -20,7 +23,8 @@ export class WelcomeScreen extends Component {
 
         const data = qs.stringify({
             username: this.state.username,
-            password: this.state.password
+            password: this.state.password,
+            token:this.state.token
         })
 
         httpClient
@@ -47,6 +51,14 @@ export class WelcomeScreen extends Component {
             .catch(error => {
                 Alert.alert('เกิดข้อผิดพลาด : ' + error.message + ' กรุณาติดต่อผู้ดูแลระบบ')
             });
+    }
+
+    componentDidMount = () =>{
+    messaging()
+      .getToken()
+      .then(token => {
+        this.setState({token:token})
+      });
     }
 
     render() {
