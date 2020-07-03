@@ -7,6 +7,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "@notifee/react-native": "^0.9.1",
     "@react-native-firebase/app": "^7.3.0",
     "@react-native-firebase/messaging": "^7.1.7",
     "axios": "^0.19.0",

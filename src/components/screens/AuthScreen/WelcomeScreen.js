@@ -3,7 +3,7 @@ import { Text, View, StyleSheet, SafeAreaView, TextInput, TouchableOpacity, Aler
 import { Container, Content } from 'native-base';
 import qs from 'qs';
 import { httpClient } from '../../../../HttpClient';
-import messaging from '@react-native-firebase/messaging';
+import messaging, { AuthorizationStatus } from '@react-native-firebase/messaging';
 
 
 export class WelcomeScreen extends Component {
@@ -19,13 +19,24 @@ export class WelcomeScreen extends Component {
         this.sigIn = this.sigIn.bind(this)
     }
 
+    async requestUserPermission() {
+        const authStatus = await messaging().requestPermission();
+        const enabled =
+            authStatus === AuthorizationStatus.AUTHORIZED || authStatus === AuthorizationStatus.PROVISIONAL;
+
+        if (enabled) {
+            console.log('Authorization status:', authStatus);
+        }
+    }
+
     async sigIn() {
+
 
         const data = qs.stringify({
             username: this.state.username,
             password: this.state.password,
             token:this.state.token
-        })
+        });
 
         httpClient
             .post('/check_login/', data)
@@ -42,6 +53,7 @@ export class WelcomeScreen extends Component {
                     await AsyncStorage.setItem("weight", result.weight.toString())
                     this.props.navigation.navigate('AuthLoading');
                 } else {
+                    console.log(response)
                     Alert.alert("ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง", "",
                         [
                             { text: 'OK', onPress: () => this.setState({ password: '' }) },
@@ -54,11 +66,13 @@ export class WelcomeScreen extends Component {
     }
 
     componentDidMount = () =>{
-    messaging()
-      .getToken()
-      .then(token => {
+        this.requestUserPermission();
+        messaging()
+        .getToken()
+            .then(token => {
         this.setState({token:token})
-      });
+        });
+
     }
 
     render() {

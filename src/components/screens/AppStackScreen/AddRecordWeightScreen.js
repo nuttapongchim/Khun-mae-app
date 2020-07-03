@@ -27,6 +27,7 @@ export class AddRecordWeightScreen extends Component {
           end:moment().endOf("week")
         }
       ],
+      log_record:[],
     };
 
     this.recordWeight = this.recordWeight.bind(this);
@@ -37,6 +38,7 @@ export class AddRecordWeightScreen extends Component {
   }
 
   componentDidMount() {
+    this.loadLogRecord();
     this.loadRecord();
     //this.setWhitelist()
   }
@@ -56,11 +58,15 @@ export class AddRecordWeightScreen extends Component {
   }
 
   toDate(date) {
+    // console.log(date);
+    // console.log(moment(new Date()).format("YYYY-MM-DD hh:mm:ss"))
+    //2020-06-21 12:00:00
+    //2020-07-02 02:40:13
     var months = ['0', 'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤษจิกายน', 'ธันวาคม'];
-    var d = date.split("-");
-    var day = d[2].split("T")
+    var d = typeof date != "undefined" ? date.split("-") : moment(new Date()).format("YYYY-MM-DD hh:mm:ss");
+    var day = d[2].split("T");
     var formatDate = day[0] + " " + months[parseInt(d[1])] + " " + (parseInt(d[0]) + 543);
-    return (formatDate);
+    return typeof date !== "undefined" ? formatDate : d ;
   }
 
   async loadRecord() {
@@ -84,18 +90,33 @@ export class AddRecordWeightScreen extends Component {
       })
   }
 
-  confirmRecord() {
+  async loadLogRecord(){
+    const userId = await AsyncStorage.getItem('userId');
+    httpClient
+        .get('/log_record_weight/' + userId)
+        .then(({data,status}) => {
+            this.setState({log_record:data})
+        }).catch(err =>{
+          console.log(err)
+    })
+  }
+
+  confirmRecord(weight,date,id) {
+    if(typeof date === "undefined"){
+      alert("กรุณาระบุวันที่ก่อนบันทึกข้อมูล");
+      return;
+    }
     Alert.alert(
       'ยืนยันการบันทึก',
-      'บันทึกน้ำหนัก ' + this.state.weight + ' กิโลกรัม \n วันที่ ' + this.toDate(this.state.selectedDate),
+      'บันทึกน้ำหนัก ' + weight + ' กิโลกรัม \n วันที่ ' + this.toDate(date),
       [
         { text: 'ยกเลิก', onPress: () => console.log('cancel record weight'), style: 'cancel' },
-        { text: 'บันทึก', onPress: () => this.recordWeight(this.state.weight, this.state.selectedDate) },
+        { text: 'บันทึก', onPress: () => this.recordWeight(weight, date,id) },
       ]
     );
   }
 
-  async recordWeight(weight, date) {
+  async recordWeight(weight, date,id) {
 
     const userId = await AsyncStorage.getItem('userId');
     const username = await AsyncStorage.getItem('username');
@@ -104,8 +125,9 @@ export class AddRecordWeightScreen extends Component {
       weight: weight,
       userId: userId,
       username: username,
-      date: this.state.selectedDate
-    })
+      date:typeof date == "undefined" ? moment(new Date()).format("YYYY-MM-DD hh:mm:ss") : date,
+      log_id:id,
+    });
 
     httpClient
       .post('/record_weight/', data)
@@ -154,7 +176,7 @@ export class AddRecordWeightScreen extends Component {
       weight: newWeight,
       userId: userId,
       date: this.dateToData(date)
-    })
+    });
 
     httpClient
       .put('/edit_record_weight/', data)
@@ -171,6 +193,19 @@ export class AddRecordWeightScreen extends Component {
 
   }
 
+
+  addWeight = (weight,index) =>{
+    this.state.log_record[index].weight = weight;
+    this.setState({log_record:this.state.log_record})
+  };
+
+
+  addDate = (date,index) =>{
+    console.log(date);
+    this.state.log_record[index].date = date;
+    this.setState({log_record:this.state.log_record})
+  };
+
   render() {
     return (
       <Root>
@@ -178,75 +213,128 @@ export class AddRecordWeightScreen extends Component {
           <Container>
             <Content>
               <View>
-                <CalendarStrip
-                  calendarAnimation={{ type: 'sequence', duration: 30 }}
-                  daySelectionAnimation={{ type: 'border', duration: 200, borderWidth: 1, borderHighlightColor: '#272C35' }}
-                  style={{ height: 100, paddingTop: 20, paddingBottom: 10 }}
-                  calendarHeaderStyle={{ color: '#272C35' }}
-                  calendarColor={'#fff'}
-                  dateNumberStyle={{ color: '#272C35' }}
-                  dateNameStyle={{ color: '#272C35' }}
-                  highlightDateNumberStyle={{ color: '#272C35' }}
-                  highlightDateNameStyle={{ color: '#272C35' }}
-                  disabledDateNameStyle={{ color: 'grey' }}
-                  disabledDateNumberStyle={{ color: 'grey' }}
-                  iconContainer={{ flex: 0.1 }}
-                  datesWhitelist={this.state.whitelist}
-                  onDateSelected={(value) => this.setState({ selectedDate: moment(new Date(value)).format("YYYY-MM-DD hh:mm:ss") })}
-                />
-              </View>
-              {/* <Text> Date : { this.state.selectedDate } </Text> */}
-              <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between', margin: 10, borderColor: '#272C35', borderWidth: 1, borderRadius: 5 }}>
-                <View style={{ justifyContent: 'center', padding: 10 }}>
-                  <TextInput
-                    autoFocus
-                    placeholder='กรอกน้ำหนัก'
-                    style={{ flex: 1, fontSize: 34, fontWeight: '200' }}
-                    keyboardType='numeric'
-                    maxLength={3}
-                    underlineColorAndroid="transparent"
-                    onChangeText={(weight) => this.setState({ weight })}
-                    placeholderTextColor="#24242477"
-                  />
-                  <Text style={{ flex: 1, fontSize: 24, fontWeight: '200', textAlign: 'right' }}>กิโลกรัม</Text>
-                </View>
-                <View style={{ justifyContent: 'center', backgroundColor: '#272C35', }}>
+                {
+                  this.state.log_record.map((item,index) =>{
+                    return(
+                        <View>
+                          <View>
+                          <CalendarStrip
+                              calendarAnimation={{ type: 'sequence', duration: 30 }}
+                              daySelectionAnimation={{ type: 'border', duration: 200, borderWidth: 1, borderHighlightColor: '#272C35' }}
+                              style={{ height: 100, paddingTop: 20, paddingBottom: 10 }}
+                              calendarHeaderStyle={{ color: '#272C35' }}
+                              calendarColor={'#fff'}
+                              dateNumberStyle={{ color: '#272C35' }}
+                              dateNameStyle={{ color: '#272C35' }}
+                              highlightDateNumberStyle={{ color: '#272C35' }}
+                              highlightDateNameStyle={{ color: '#272C35' }}
+                              disabledDateNameStyle={{ color: 'grey' }}
+                              disabledDateNumberStyle={{ color: 'grey' }}
+                              iconContainer={{ flex: 0.1 }}
+                              selectedDate={moment(item.log_start_record_weight).format('DD-MMM-YYYY')}
+                              datesWhitelist={
+                                [{
+                                  start:moment(item.log_start_record_weight).format('DD-MMM-YYYY'),
+                                  end:moment(item.log_end_record_weight).format('DD-MMM-YYYY')
+                               }]}
+                              onDateSelected={(value) => this.addDate(moment(new Date(value)).format("YYYY-MM-DD hh:mm:ss"),index)}
+                          />
 
-                  {
-                    this.state.weight == undefined && this.state.weight == "" && <Text></Text>
-                  }
-                  {
-                    this.state.weight !== undefined && this.state.weight !== "" && <TouchableOpacity onPress={this.confirmRecord} >
-                      <Text style={{ flex: 1, fontWeight: '200', fontSize: 20, padding: 30, color: '#fff' }}>
-                        บันทึก
-                </Text>
-                    </TouchableOpacity>
-                  }
+                        </View>
+                          <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between', margin: 10, borderColor: '#272C35', borderWidth: 1, borderRadius: 5 }}>
+                            <View style={{ justifyContent: 'center', padding: 10 }}>
+                              <TextInput
+                                  autoFocus
+                                  placeholder='กรอกน้ำหนัก'
+                                  style={{ flex: 1, fontSize: 34, fontWeight: '200' }}
+                                  keyboardType='numeric'
+                                  maxLength={3}
+                                  underlineColorAndroid="transparent"
+                                  onChangeText={(weight) => this.addWeight(weight,index)}
+                                  placeholderTextColor="#24242477"
+                              />
+                              <Text style={{ flex: 1, fontSize: 24, fontWeight: '200', textAlign: 'right' }}>กิโลกรัม</Text>
+                            </View>
+                            <View style={{ justifyContent: 'center', backgroundColor: '#272C35', }}>
 
-                </View>
+                              {
+                                item.weight == undefined && item.weight == "" && <Text></Text>
+                              }
+                              {
+                                item.weight !== undefined && item.weight !== "" &&
+                                <TouchableOpacity onPress={()=>this.confirmRecord(item.weight,item.date,item.id_log_record_weight)} >
+                                  <Text style={{ flex: 1, fontWeight: '200', fontSize: 20, padding: 30, color: '#fff' }}>
+                                    บันทึก
+                                  </Text>
+                                </TouchableOpacity>
+                              }
+
+                            </View>
+                          </View>
+                          {
+                            this.state.isFetching && <ActivityIndicator size="large" style={{ flex: 1, flexDirection: 'column', justifyContent: 'center' }} />
+                          }
+                          {
+                            !this.state.isFetching && this.state.recordWeightDataRev.length ? (
+                                this.state.recordWeightDataRev.map((recordWeight, i) => {
+                                  return <View key={i} style={{ flexDirection: 'row', justifyContent: 'space-between', padding: 0 }}>
+                                    <View style={{ flexDirection: 'column', padding: 10 }}>
+                                      <Text style={{ fontSize: 18, fontWeight: '400' }}>{recordWeight.RECORD_VALUE} กิโลกรัม</Text>
+                                      <Text style={{ fontSize: 16, color: '#272C3599' }}>{this.toDate(recordWeight.RECORD_DATE)}</Text>
+                                    </View>
+                                    <View style={{ flexDirection: 'column', padding: 10 }}>
+                                      <TouchableOpacity onPress={() => this.setState({ dialogVisible: true, editRecordDate: this.toDate(recordWeight.RECORD_DATE), editRecordValue: recordWeight.RECORD_VALUE })}>
+                                        <Text style={{ color: '#272C35', fontSize: 16, fontWeight: '400', backgroundColor: '#ffffff', borderWidth: 1, borderRadius: 5, padding: 5, borderColor: '#272C35' }}>
+                                          แก้ไข
+                                        </Text>
+                                      </TouchableOpacity>
+                                    </View>
+                                  </View>
+                                })
+                            ) : null
+                          }
+                        </View>
+                    )
+                  })
+                }
               </View>
               {
                 this.state.isFetching && <ActivityIndicator size="large" style={{ flex: 1, flexDirection: 'column', justifyContent: 'center' }} />
               }
               {
                 !this.state.isFetching && this.state.recordWeightDataRev.length ? (
-                  this.state.recordWeightDataRev.map((recordWeight, i) => {
-                    return <View key={i} style={{ flexDirection: 'row', justifyContent: 'space-between', padding: 0 }}>
-                      <View style={{ flexDirection: 'column', padding: 10 }}>
-                        <Text style={{ fontSize: 18, fontWeight: '400' }}>{recordWeight.RECORD_VALUE} กิโลกรัม</Text>
-                        <Text style={{ fontSize: 16, color: '#272C3599' }}>{this.toDate(recordWeight.RECORD_DATE)}</Text>
+                    this.state.recordWeightDataRev.map((recordWeight, i) => {
+                      return <View key={i} style={{flexDirection: 'row', justifyContent: 'space-between', padding: 0}}>
+                        <View style={{flexDirection: 'column', padding: 10}}>
+                          <Text style={{fontSize: 18, fontWeight: '400'}}>{recordWeight.RECORD_VALUE} กิโลกรัม</Text>
+                          <Text
+                              style={{fontSize: 16, color: '#272C3599'}}>{this.toDate(recordWeight.RECORD_DATE)}</Text>
+                        </View>
+                        <View style={{flexDirection: 'column', padding: 10}}>
+                          <TouchableOpacity onPress={() => this.setState({
+                            dialogVisible: true,
+                            editRecordDate: this.toDate(recordWeight.RECORD_DATE),
+                            editRecordValue: recordWeight.RECORD_VALUE
+                          })}>
+                            <Text style={{
+                              color: '#272C35',
+                              fontSize: 16,
+                              fontWeight: '400',
+                              backgroundColor: '#ffffff',
+                              borderWidth: 1,
+                              borderRadius: 5,
+                              padding: 5,
+                              borderColor: '#272C35'
+                            }}>
+                              แก้ไข
+                            </Text>
+                          </TouchableOpacity>
+                        </View>
                       </View>
-                      <View style={{ flexDirection: 'column', padding: 10 }}>
-                        <TouchableOpacity onPress={() => this.setState({ dialogVisible: true, editRecordDate: this.toDate(recordWeight.RECORD_DATE), editRecordValue: recordWeight.RECORD_VALUE })}>
-                          <Text style={{ color: '#272C35', fontSize: 16, fontWeight: '400', backgroundColor: '#ffffff', borderWidth: 1, borderRadius: 5, padding: 5, borderColor: '#272C35' }}>
-                            แก้ไข
-                        </Text>
-                        </TouchableOpacity>
-                      </View>
-                    </View>
-                  })
+                    })
                 ) : null
               }
+
 
               <Dialog
                 visible={this.state.dialogVisible}
