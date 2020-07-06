@@ -19,8 +19,8 @@ axios.interceptors.request.use(async (config) => {
                 }
             }
 
-            // config.url = join('http://203.150.243.150:3003/api/v1', config.url);
-            config.url = join('http://10.0.2.2:3003/api/v1', config.url);
+            config.url = join('http://203.150.243.150:3003/api/v1', config.url);
+            // config.url = join('http://10.0.2.2:3003/api/v1', config.url);
 
         }
         
