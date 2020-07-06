@@ -3,6 +3,8 @@ import { Text, View, StyleSheet, SafeAreaView, TextInput, TouchableOpacity, Aler
 import { Container, Content } from 'native-base';
 import qs from 'qs';
 import { httpClient } from '../../../../HttpClient';
+import messaging, { AuthorizationStatus } from '@react-native-firebase/messaging';
+
 
 export class WelcomeScreen extends Component {
 
@@ -10,18 +12,31 @@ export class WelcomeScreen extends Component {
         super()
         this.state = {
             username: '',
-            password: ''
+            password: '',
+            token:''
         }
 
         this.sigIn = this.sigIn.bind(this)
     }
 
+    async requestUserPermission() {
+        const authStatus = await messaging().requestPermission();
+        const enabled =
+            authStatus === AuthorizationStatus.AUTHORIZED || authStatus === AuthorizationStatus.PROVISIONAL;
+
+        if (enabled) {
+            console.log('Authorization status:', authStatus);
+        }
+    }
+
     async sigIn() {
+
 
         const data = qs.stringify({
             username: this.state.username,
-            password: this.state.password
-        })
+            password: this.state.password,
+            token:this.state.token
+        });
 
         httpClient
             .post('/check_login/', data)
@@ -38,6 +53,7 @@ export class WelcomeScreen extends Component {
                     await AsyncStorage.setItem("weight", result.weight.toString())
                     this.props.navigation.navigate('AuthLoading');
                 } else {
+                    console.log(response)
                     Alert.alert("ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง", "",
                         [
                             { text: 'OK', onPress: () => this.setState({ password: '' }) },
@@ -47,6 +63,16 @@ export class WelcomeScreen extends Component {
             .catch(error => {
                 Alert.alert('เกิดข้อผิดพลาด : ' + error.message + ' กรุณาติดต่อผู้ดูแลระบบ')
             });
+    }
+
+    componentDidMount = () =>{
+        this.requestUserPermission();
+        messaging()
+        .getToken()
+            .then(token => {
+        this.setState({token:token})
+        });
+
     }
 
     render() {

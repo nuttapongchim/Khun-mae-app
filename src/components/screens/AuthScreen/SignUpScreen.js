@@ -5,6 +5,8 @@ import { Text, View, StyleSheet, SafeAreaView, TextInput, TouchableOpacity, Asyn
 import { Container, Content } from 'native-base';
 import DatePicker from 'react-native-datepicker';
 import { httpClient } from '../../../../HttpClient';
+import messaging, { AuthorizationStatus } from '@react-native-firebase/messaging';
+
 
 export class SignUpScreen extends Component {
 
@@ -19,12 +21,21 @@ export class SignUpScreen extends Component {
             birthdate: '',
             weight: '',
             height: '',
-            gestation_age: ''
+            gestation_age: '',
+            token:'',
         }
 
         this.toDate = this.toDate.bind(this)
         this.selectDate = this.selectDate.bind(this)
         this.signUp = this.signUp.bind(this)
+    }
+
+    componentDidMount(): void {
+        messaging()
+            .getToken()
+            .then(token => {
+                this.setState({token:token})
+            });
     }
 
     signUp() {
@@ -37,7 +48,8 @@ export class SignUpScreen extends Component {
             birthdate: this.state.birthdate,
             weight: this.state.weight,
             height: this.state.height,
-            gestation_age: this.state.gestation_age
+            gestation_age: this.state.gestation_age,
+            token:this.state.token
         })
 
         httpClient
@@ -158,6 +170,7 @@ export class SignUpScreen extends Component {
                             <TextInput placeholder='ส่วนสูง' maxLength={3} onChangeText={(text) => this.setState({ height: text })} style={styles.textInput} keyboardType='numeric' underlineColorAndroid="transparent" />
                             <TextInput placeholder='อายุครรภ์ (สัปดาห์)' maxLength={2} onChangeText={(text) => this.setState({ gestation_age: text })} style={styles.textInput} keyboardType='numeric' underlineColorAndroid="transparent" />
 
+                            {/*<TouchableOpacity style={{ width: '90%' }} onPress={() => this.signUp()}>*/}
                             <TouchableOpacity style={{ width: '90%' }} onPress={() => this.signUp()}>
                                 <View style={{ padding: 10, marginTop: 5, alignItems: 'center', backgroundColor: '#272C35', borderWidth: 1, borderRadius: 5 }}>
                                     <Text style={{ fontSize: 18, fontWeight: '200', color: '#fff' }}>สมัครสมาชิก</Text>

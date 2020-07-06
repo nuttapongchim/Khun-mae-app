@@ -3,6 +3,7 @@ package com.khunmea;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import io.invertase.firebase.messaging.ReactNativeFirebaseMessagingPackage;
 import com.oblador.vectoricons.VectorIconsPackage;
 import com.horcrux.svg.SvgPackage;
 import com.henninghall.date_picker.DatePickerPackage;
@@ -14,6 +15,8 @@ import com.facebook.soloader.SoLoader;
 
 import java.util.Arrays;
 import java.util.List;
+
+import io.invertase.firebase.app.ReactNativeFirebaseAppPackage;
 
 public class MainApplication extends Application implements ReactApplication {
 
@@ -27,6 +30,8 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
+            new ReactNativeFirebaseMessagingPackage(),
+            new ReactNativeFirebaseAppPackage(),
             new VectorIconsPackage(),
             new SvgPackage(),
             new DatePickerPackage(),
